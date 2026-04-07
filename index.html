@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30-Day Fit Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --green: #1D9E75;
+  --green-light: #E1F5EE;
+  --green-dark: #085041;
+  --amber: #EF9F27;
+  --amber-light: #FAEEDA;
+  --purple: #7F77DD;
+  --purple-light: #EEEDFE;
+  --purple-dark: #3C3489;
+  --bg: #F5F3EE;
+  --card: #FFFFFF;
+  --text: #1a1a18;
+  --text-muted: #6b6b66;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.14);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── TOP HERO ── */
+.hero {
+  background: var(--text);
+  color: #fff;
+  padding: 2.5rem 1.5rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 70% 20%, rgba(29,158,117,0.3) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 60% at 20% 80%, rgba(127,119,221,0.25) 0%, transparent 70%);
+}
+.hero-tag {
+  display: inline-block;
+  background: rgba(29,158,117,0.25);
+  color: #5DCAA5;
+  font-size: 11px;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 99px;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+.hero h1 span { color: #5DCAA5; }
+.hero-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+/* day nav in hero */
+.day-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.day-nav-btn {
+  background: rgba(255,255,255,0.1);
+  border: 0.5px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 99px;
+  width: 36px; height: 36px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.day-nav-btn:hover { background: rgba(255,255,255,0.18); }
+.day-center { text-align: center; }
+.day-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.day-focus {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 3px;
+}
+
+/* progress pills */
+.day-pills {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  max-width: 420px;
+  margin: 0 auto;
+  position: relative;
+}
+.pill {
+  width: 10px; height: 10px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.pill.done { background: var(--green); }
+.pill.active { background: #fff; transform: scale(1.3); }
+.pill:hover { opacity: 0.8; }
+
+/* ── MAIN CONTENT ── */
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* stats row */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+.stat {
+  background: var(--card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* progress bar */
+.progress-wrap {
+  background: var(--card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.progress-label { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+.bar-bg {
+  flex: 1; height: 8px;
+  background: #eee;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--green), #5DCAA5);
+  transition: width 0.4s ease;
+}
+.progress-pct {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+  min-width: 38px;
+  text-align: right;
+}
+
+/* sections */
+.section {
+  background: var(--card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 0.5px solid var(--border);
+}
+.s-icon {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.s-icon.ex  { background: var(--green-light); }
+.s-icon.diet { background: var(--amber-light); }
+.s-icon.life { background: var(--purple-light); }
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.section-sub { font-size: 12px; color: var(--text-muted); }
+.s-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-radius: 99px;
+  padding: 3px 10px;
+  font-weight: 500;
+}
+
+/* tasks */
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 13px 18px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+  user-select: none;
+}
+.task:last-child { border-bottom: none; }
+.task:hover { background: #fafaf8; }
+.task.done .task-name { color: #aaa; text-decoration: line-through; }
+.task.done .task-detail { color: #ccc; }
+
+.cb {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  background: #fff;
+}
+.cb.on { border-color: var(--green); background: var(--green); }
+.cb svg { display: none; }
+.cb.on svg { display: block; }
+
+.task-name { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.35; }
+.task-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* rest day special */
+.rest-banner {
+  background: linear-gradient(135deg, #EEEDFE, #E1F5EE);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  text-align: center;
+  margin: 12px 16px 16px;
+}
+.rest-banner .rb-icon { font-size: 36px; margin-bottom: 8px; }
+.rest-banner h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--purple-dark); margin-bottom: 4px; }
+.rest-banner p { font-size: 13px; color: var(--text-muted); }
+
+/* ── DARK MODE ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111110;
+    --card: #1c1c1a;
+    --text: #f0ede6;
+    --text-muted: #888880;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+  }
+  .task:hover { background: #222220; }
+  .cb { background: #111; border-color: #444; }
+  .bar-bg { background: #2a2a28; }
+  .stat-num { color: var(--text); }
+}
+
+@media (max-width: 480px) {
+  .hero { padding: 2rem 1rem 2.5rem; }
+  .stats { grid-template-columns: repeat(3, 1fr); }
+  .stat-num { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">30-Day Program</div>
+  <h1>Build Muscle.<br/><span>Get Fit.</span></h1>
+  <p class="hero-sub">Your daily checklist — exercise, diet & lifestyle</p>
+
+  <div class="day-nav">
+    <button class="day-nav-btn" onclick="changeDay(-1)" title="Previous day">&#8592;</button>
+    <div class="day-center">
+      <div class="day-num" id="day-num">Day 1</div>
+      <div class="day-focus" id="day-focus">—</div>
+    </div>
+    <button class="day-nav-btn" onclick="changeDay(1)" title="Next day">&#8594;</button>
+  </div>
+
+  <div class="day-pills" id="day-pills"></div>
+</div>
+
+<div class="main">
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="s-done">0</div><div class="stat-label">Done</div></div>
+    <div class="stat"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total</div></div>
+    <div class="stat"><div class="stat-num" id="s-streak">0</div><div class="stat-label">Streak</div></div>
+  </div>
+
+  <div class="progress-wrap">
+    <span class="progress-label">Today's progress</span>
+    <div class="bar-bg"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+    <span class="progress-pct" id="pct">0%</span>
+  </div>
+
+  <!-- Exercise -->
+  <div class="section">
+    <div class="section-header">
+      <div class="s-icon ex">💪</div>
+      <div><div class="section-title">Exercise</div><div class="section-sub" id="ex-sub"></div></div>
+      <div class="s-count" id="ex-count">0/0</div>
+    </div>
+    <div id="ex-list"></div>
+  </div>
+
+  <!-- Diet -->
+  <div class="section">
+    <div class="section-header">
+      <div class="s-icon diet">🥗</div>
+      <div><div class="section-title">Diet</div><div class="section-sub">Fuel your gains</div></div>
+      <div class="s-count" id="diet-count">0/0</div>
+    </div>
+    <div id="diet-list"></div>
+  </div>
+
+  <!-- Lifestyle -->
+  <div class="section">
+    <div class="section-header">
+      <div class="s-icon life">✨</div>
+      <div><div class="section-title">Lifestyle</div><div class="section-sub">Recovery & wellbeing</div></div>
+      <div class="s-count" id="life-count">0/0</div>
+    </div>
+    <div id="life-list"></div>
+  </div>
+</div>
+
+<script>
+// ─── 30-DAY WORKOUT PLAN ───
+const workouts = [
+  {focus:"Upper body strength",rest:false,ex:[
+    {n:"Push-ups",d:"4 sets × 15 reps"},
+    {n:"Dumbbell shoulder press",d:"3 sets × 12 reps"},
+    {n:"Tricep dips",d:"3 sets × 12 reps"},
+    {n:"Bicep curls",d:"3 sets × 10 reps"},
+    {n:"Plank hold",d:"3 × 45 seconds"},
+  ]},
+  {focus:"Lower body power",rest:false,ex:[
+    {n:"Squats",d:"4 sets × 15 reps"},
+    {n:"Lunges",d:"3 sets × 12 each leg"},
+    {n:"Glute bridges",d:"3 sets × 15 reps"},
+    {n:"Calf raises",d:"4 sets × 20 reps"},
+    {n:"Wall sit",d:"3 × 45 seconds"},
+  ]},
+  {focus:"Cardio & core",rest:false,ex:[
+    {n:"20-min run or jump rope",d:"Steady moderate pace"},
+    {n:"Mountain climbers",d:"3 sets × 30 reps"},
+    {n:"Bicycle crunches",d:"3 sets × 20 reps"},
+    {n:"Leg raises",d:"3 sets × 15 reps"},
+    {n:"Burpees",d:"3 sets × 10 reps"},
+  ]},
+  {focus:"Back & biceps",rest:false,ex:[
+    {n:"Pull-ups or lat pulldown",d:"4 sets × 10 reps"},
+    {n:"Bent-over rows",d:"3 sets × 12 reps"},
+    {n:"Face pulls",d:"3 sets × 15 reps"},
+    {n:"Hammer curls",d:"3 sets × 12 reps"},
+    {n:"Superman holds",d:"3 sets × 15 reps"},
+  ]},
+  {focus:"HIIT day",rest:false,ex:[
+    {n:"Jump squats",d:"4 sets × 12 reps"},
+    {n:"High knees",d:"4 rounds × 30 seconds"},
+    {n:"Box jumps",d:"3 sets × 10 reps"},
+    {n:"Sprint intervals",d:"6 × 20 seconds"},
+    {n:"Skater jumps",d:"3 sets × 15 reps"},
+  ]},
+  {focus:"Chest & shoulders",rest:false,ex:[
+    {n:"Bench press or floor press",d:"4 sets × 12 reps"},
+    {n:"Incline push-ups",d:"3 sets × 15 reps"},
+    {n:"Lateral raises",d:"3 sets × 15 reps"},
+    {n:"Arnold press",d:"3 sets × 10 reps"},
+    {n:"Cable fly or chest stretch",d:"3 sets × 12 reps"},
+  ]},
+  {focus:"Active recovery",rest:true,ex:[
+    {n:"30-min brisk walk",d:"Outdoors if possible"},
+    {n:"Full-body stretching",d:"20 minutes"},
+    {n:"Foam rolling",d:"10 minutes"},
+    {n:"Deep breathing / box breathing",d:"5 minutes"},
+    {n:"Mobility flow",d:"10 minutes"},
+  ]},
+  {focus:"Upper body strength +",rest:false,ex:[
+    {n:"Diamond push-ups",d:"4 sets × 12 reps"},
+    {n:"Overhead press",d:"4 sets × 10 reps"},
+    {n:"Close-grip bench",d:"3 sets × 12 reps"},
+    {n:"Concentration curls",d:"3 sets × 12 reps"},
+    {n:"Side plank",d:"3 × 40 seconds each side"},
+  ]},
+  {focus:"Leg day intensity",rest:false,ex:[
+    {n:"Bulgarian split squats",d:"3 sets × 10 each leg"},
+    {n:"Romanian deadlift",d:"4 sets × 10 reps"},
+    {n:"Step-ups",d:"3 sets × 15 each leg"},
+    {n:"Leg press",d:"4 sets × 15 reps"},
+    {n:"Hamstring curls",d:"3 sets × 12 reps"},
+  ]},
+  {focus:"Core intensive",rest:false,ex:[
+    {n:"Dead bug",d:"3 sets × 10 reps each"},
+    {n:"Russian twists",d:"3 sets × 20 reps"},
+    {n:"Hollow body hold",d:"3 × 30 seconds"},
+    {n:"V-ups",d:"3 sets × 15 reps"},
+    {n:"Ab wheel rollout",d:"3 sets × 10 reps"},
+  ]},
+  {focus:"Pull day",rest:false,ex:[
+    {n:"Wide-grip pull-ups",d:"4 sets × 8 reps"},
+    {n:"Seated cable row",d:"3 sets × 12 reps"},
+    {n:"Single-arm dumbbell row",d:"3 sets × 12 each"},
+    {n:"Rear delt fly",d:"3 sets × 15 reps"},
+    {n:"Chin-ups",d:"3 sets × 8 reps"},
+  ]},
+  {focus:"Cardio conditioning",rest:false,ex:[
+    {n:"30-min cycling or rowing",d:"Moderate intensity"},
+    {n:"Jump rope intervals",d:"5 × 1 min on / 30 sec off"},
+    {n:"Stair climbs",d:"10 minutes"},
+    {n:"Jumping jacks",d:"3 sets × 50 reps"},
+    {n:"Cool-down walk",d:"5 minutes"},
+  ]},
+  {focus:"Push day",rest:false,ex:[
+    {n:"Barbell bench press",d:"4 sets × 8 reps"},
+    {n:"Dumbbell flyes",d:"3 sets × 12 reps"},
+    {n:"Pike push-ups",d:"3 sets × 12 reps"},
+    {n:"Tricep pushdowns",d:"3 sets × 15 reps"},
+    {n:"Chest dips",d:"3 sets × 10 reps"},
+  ]},
+  {focus:"Active recovery",rest:true,ex:[
+    {n:"Yoga flow",d:"30 minutes"},
+    {n:"Light swimming or walk",d:"20 minutes"},
+    {n:"Foam rolling — full body",d:"15 minutes"},
+    {n:"Journal your progress",d:"5 minutes"},
+    {n:"Sleep 8 hours tonight",d:"Priority rest"},
+  ]},
+  {focus:"Full body compound",rest:false,ex:[
+    {n:"Deadlifts",d:"4 sets × 8 reps"},
+    {n:"Barbell squats",d:"4 sets × 10 reps"},
+    {n:"Bent-over rows",d:"3 sets × 10 reps"},
+    {n:"Push press",d:"3 sets × 10 reps"},
+    {n:"Farmer's carry",d:"3 × 40 metres"},
+  ]},
+  {focus:"Upper body endurance",rest:false,ex:[
+    {n:"Push-up ladder (1–10–1)",d:"Up and back"},
+    {n:"Band pull-aparts",d:"3 sets × 20 reps"},
+    {n:"Dips",d:"4 sets × 12 reps"},
+    {n:"Inverted rows",d:"3 sets × 12 reps"},
+    {n:"Plank shoulder taps",d:"3 × 30 reps"},
+  ]},
+  {focus:"Lower body endurance",rest:false,ex:[
+    {n:"Jump lunges",d:"3 sets × 20 reps"},
+    {n:"Sumo squats",d:"4 sets × 15 reps"},
+    {n:"Donkey kicks",d:"3 sets × 20 each"},
+    {n:"Fire hydrants",d:"3 sets × 20 each"},
+    {n:"Standing calf raises",d:"5 sets × 25 reps"},
+  ]},
+  {focus:"HIIT advanced",rest:false,ex:[
+    {n:"Burpee pull-ups",d:"4 sets × 8 reps"},
+    {n:"Tuck jumps",d:"3 sets × 12 reps"},
+    {n:"Bear crawl",d:"3 × 20 metres"},
+    {n:"Lateral bounds",d:"3 sets × 12 reps"},
+    {n:"Sprint tabata",d:"8 × 20 sec on / 10 sec off"},
+  ]},
+  {focus:"Shoulder specialisation",rest:false,ex:[
+    {n:"Seated dumbbell press",d:"4 sets × 12 reps"},
+    {n:"Front raises",d:"3 sets × 12 reps"},
+    {n:"Upright rows",d:"3 sets × 12 reps"},
+    {n:"Shrugs",d:"4 sets × 15 reps"},
+    {n:"Reverse pec deck",d:"3 sets × 15 reps"},
+  ]},
+  {focus:"Core & flexibility",rest:false,ex:[
+    {n:"Yoga sun salutations",d:"5 rounds"},
+    {n:"Plank variations",d:"3 × 45 sec each"},
+    {n:"Windmill stretches",d:"3 sets × 10 reps"},
+    {n:"Pigeon pose",d:"2 min each side"},
+    {n:"Hip flexor stretch",d:"2 min each side"},
+  ]},
+  {focus:"Active recovery",rest:true,ex:[
+    {n:"Long walk outdoors",d:"45 minutes"},
+    {n:"Full body stretch",d:"20 minutes"},
+    {n:"Ice bath or cold shower",d:"2–3 minutes"},
+    {n:"Meal prep for the week",d:"Build good habits"},
+    {n:"Progress photos",d:"Track your journey"},
+  ]},
+  {focus:"Full body strength",rest:false,ex:[
+    {n:"Trap bar deadlift",d:"4 sets × 8 reps"},
+    {n:"Incline dumbbell press",d:"3 sets × 10 reps"},
+    {n:"Cable rows",d:"3 sets × 12 reps"},
+    {n:"Goblet squats",d:"3 sets × 15 reps"},
+    {n:"Pallof press",d:"3 sets × 12 reps"},
+  ]},
+  {focus:"Power & explosives",rest:false,ex:[
+    {n:"Power cleans",d:"4 sets × 5 reps"},
+    {n:"Box jumps",d:"4 sets × 8 reps"},
+    {n:"Broad jumps",d:"3 sets × 6 reps"},
+    {n:"Plyo push-ups",d:"3 sets × 8 reps"},
+    {n:"Medicine ball slams",d:"3 sets × 10 reps"},
+  ]},
+  {focus:"Arm day",rest:false,ex:[
+    {n:"EZ bar curls",d:"4 sets × 12 reps"},
+    {n:"Skull crushers",d:"4 sets × 12 reps"},
+    {n:"Preacher curls",d:"3 sets × 10 reps"},
+    {n:"Overhead tricep extension",d:"3 sets × 12 reps"},
+    {n:"Cable curls + pushdowns superset",d:"3 sets × 15 reps each"},
+  ]},
+  {focus:"Cardio & intervals",rest:false,ex:[
+    {n:"5 km run or brisk walk",d:"Time yourself"},
+    {n:"Hill sprints",d:"8 × 20 sec"},
+    {n:"Agility ladder drills",d:"5 minutes"},
+    {n:"Jump rope double-unders",d:"3 sets × 30 reps"},
+    {n:"Cool-down stretching",d:"10 minutes"},
+  ]},
+  {focus:"Back thickness",rest:false,ex:[
+    {n:"T-bar rows",d:"4 sets × 10 reps"},
+    {n:"Chest-supported rows",d:"3 sets × 12 reps"},
+    {n:"Lat pulldown wide grip",d:"3 sets × 12 reps"},
+    {n:"Seated rows",d:"3 sets × 12 reps"},
+    {n:"Good mornings",d:"3 sets × 12 reps"},
+  ]},
+  {focus:"Leg strength peak",rest:false,ex:[
+    {n:"Back squats — heavy",d:"5 sets × 5 reps"},
+    {n:"Hack squats",d:"3 sets × 10 reps"},
+    {n:"Walking lunges",d:"3 sets × 20 reps"},
+    {n:"Seated leg press",d:"4 sets × 12 reps"},
+    {n:"Single-leg calf raises",d:"4 sets × 15 each"},
+  ]},
+  {focus:"Active recovery",rest:true,ex:[
+    {n:"Restorative yoga",d:"30 minutes"},
+    {n:"Epsom salt bath",d:"20 minutes"},
+    {n:"Light cycling",d:"20 minutes easy"},
+    {n:"Reflect on 4 weeks",d:"Write 3 wins"},
+    {n:"Plan month 2",d:"Set your next goals"},
+  ]},
+  {focus:"Full body finisher",rest:false,ex:[
+    {n:"Deadlifts",d:"3 sets × 8 reps"},
+    {n:"Bench press",d:"3 sets × 10 reps"},
+    {n:"Pull-ups",d:"3 sets × max reps"},
+    {n:"Squats",d:"3 sets × 12 reps"},
+    {n:"Core circuit",d:"Plank + crunch + leg raise × 3"},
+  ]},
+  {focus:"Day 30 — Celebrate!",rest:false,ex:[
+    {n:"Your favourite workout",d:"Go all out — you earned it"},
+    {n:"Progress comparison photos",d:"Document your transformation"},
+    {n:"Max push-up test",d:"Beat your Day 1 score"},
+    {n:"Max squat test",d:"Beat your Day 1 score"},
+    {n:"Write your 30-day review",d:"Celebrate every win"},
+  ]},
+];
+
+const dietTasks = [
+  {n:"Breakfast",d:"High-protein: eggs + oats or Greek yogurt + berries"},
+  {n:"Morning snack",d:"Handful of almonds or a piece of fruit"},
+  {n:"Lunch",d:"Lean protein + brown rice or sweet potato + greens"},
+  {n:"Pre-workout snack",d:"Banana or rice cakes with peanut butter"},
+  {n:"Post-workout shake",d:"Whey or plant protein + milk"},
+  {n:"Dinner",d:"Grilled protein + roasted veg + complex carbs"},
+  {n:"Evening snack (optional)",d:"Cottage cheese or casein protein before bed"},
+];
+
+const lifeTasks = [
+  {n:"Drink 3 litres of water",d:"Track with a reusable bottle"},
+  {n:"Sleep 7–8 hours",d:"Same bedtime every night"},
+  {n:"Morning skincare",d:"Cleanse → tone → moisturise → SPF"},
+  {n:"Evening skincare",d:"Cleanse → serum → moisturise"},
+  {n:"10-min mindfulness",d:"Meditate, breathe, or journal"},
+  {n:"8,000+ steps",d:"Use your phone pedometer"},
+];
+
+// ─── STATE ───
+function getStartDate() {
+  let s = localStorage.getItem('fit_start');
+  if (!s) { s = new Date().toISOString().split('T')[0]; localStorage.setItem('fit_start', s); }
+  return s;
+}
+
+function todayIndex() {
+  const start = new Date(getStartDate());
+  const now = new Date();
+  const diff = Math.floor((now - start) / 86400000);
+  return Math.min(Math.max(diff, 0), 29);
+}
+
+let currentDay = todayIndex();
+let checks = JSON.parse(localStorage.getItem('fit_checks') || '{}');
+
+function save() { localStorage.setItem('fit_checks', JSON.stringify(checks)); }
+
+function key(d, cat, i) { return `d${d}_${cat}_${i}`; }
+
+function buildList(containerId, countId, items, cat, color) {
+  const ul = document.getElementById(containerId);
+  ul.innerHTML = '';
+  let done = 0;
+  items.forEach((item, i) => {
+    const k = key(currentDay, cat, i);
+    const checked = !!checks[k];
+    if (checked) done++;
+    const row = document.createElement('div');
+    row.className = 'task' + (checked ? ' done' : '');
+    row.innerHTML = `
+      <div class="cb ${checked ? 'on' : ''}">
+        <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+          <polyline points="1,4.5 4.5,8 10,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="task-name">${item.n}</div>
+        <div class="task-detail">${item.d}</div>
+      </div>`;
+    row.onclick = () => {
+      checks[k] = !checks[k];
+      save();
+      render();
+    };
+    ul.appendChild(row);
+  });
+  document.getElementById(countId).textContent = `${done}/${items.length}`;
+  return done;
+}
+
+function render() {
+  const w = workouts[currentDay];
+  document.getElementById('day-num').textContent = `Day ${currentDay + 1}`;
+  document.getElementById('day-focus').textContent = w.focus;
+
+  // pills
+  const pillsEl = document.getElementById('day-pills');
+  pillsEl.innerHTML = '';
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    const dayDone = isDayComplete(i);
+    p.className = 'pill' + (dayDone ? ' done' : '') + (i === currentDay ? ' active' : '');
+    p.title = `Day ${i + 1}`;
+    p.onclick = (e) => { e.stopPropagation(); currentDay = i; render(); };
+    pillsEl.appendChild(p);
+  }
+
+  // exercise section
+  const exList = document.getElementById('ex-list');
+  if (w.rest) {
+    exList.innerHTML = `<div class="rest-banner"><div class="rb-icon">🧘</div><h3>Rest & Recover</h3><p>Light movement only. Your muscles grow during rest.</p></div>`;
+    document.getElementById('ex-count').textContent = '';
+    document.getElementById('ex-sub').textContent = w.focus;
+    // still render rest tasks
+    const exEl2 = document.createElement('div');
+    let exDone2 = 0;
+    w.ex.forEach((item, i) => {
+      const k = key(currentDay, 'ex', i);
+      const checked = !!checks[k];
+      if (checked) exDone2++;
+      const row = document.createElement('div');
+      row.className = 'task' + (checked ? ' done' : '');
+      row.innerHTML = `<div class="cb ${checked?'on':''}"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><polyline points="1,4.5 4.5,8 10,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="task-name">${item.n}</div><div class="task-detail">${item.d}</div></div>`;
+      row.onclick = () => { checks[key(currentDay,'ex',i)]=!checks[key(currentDay,'ex',i)]; save(); render(); };
+      exList.appendChild(row);
+    });
+    document.getElementById('ex-count').textContent = `${exDone2}/${w.ex.length}`;
+  } else {
+    document.getElementById('ex-sub').textContent = w.focus;
+    buildList('ex-list', 'ex-count', w.ex, 'ex');
+  }
+
+  const dietDone = buildList('diet-list', 'diet-count', dietTasks, 'diet');
+  const lifeDone = buildList('life-list', 'life-count', lifeTasks, 'life');
+
+  // recalc ex done for stats
+  let exDone = 0;
+  w.ex.forEach((_, i) => { if (checks[key(currentDay,'ex',i)]) exDone++; });
+  const total = w.ex.length + dietTasks.length + lifeTasks.length;
+  const done = exDone + dietDone + lifeDone;
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('s-done').textContent = done;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+
+  // streak
+  let streak = 0;
+  for (let i = currentDay; i >= 0; i--) {
+    if (isDayComplete(i)) streak++;
+    else break;
+  }
+  document.getElementById('s-streak').textContent = streak;
+}
+
+function isDayComplete(d) {
+  const w = workouts[d];
+  const all = [...w.ex.map((_,i)=>key(d,'ex',i)), ...dietTasks.map((_,i)=>key(d,'diet',i)), ...lifeTasks.map((_,i)=>key(d,'life',i))];
+  return all.length > 0 && all.every(k => checks[k]);
+}
+
+function changeDay(dir) {
+  currentDay = Math.max(0, Math.min(29, currentDay + dir));
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
