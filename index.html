@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>30-Day Fit Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --green: #1D9E75;
+  --green-light: #E1F5EE;
+  --green-dark: #085041;
+  --amber: #EF9F27;
+  --amber-light: #FAEEDA;
+  --purple: #7F77DD;
+  --purple-light: #EEEDFE;
+  --purple-dark: #3C3489;
+  --blue: #378ADD;
+  --blue-light: #E6F1FB;
+  --bg: #F5F3EE;
+  --card: #FFFFFF;
+  --text: #1a1a18;
+  --text-muted: #6b6b66;
+  --border: rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.tab-bar {
+  background: var(--text);
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.tab-btn {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  padding: 14px 18px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn.active { color: #fff; border-bottom-color: var(--green); }
+.tab-btn:hover:not(.active) { color: rgba(255,255,255,0.75); }
+.page { display: none; }
+.page.active { display: block; }
+
+.hero {
+  background: var(--text);
+  color: #fff;
+  padding: 2rem 1.5rem 2.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 70% 20%, rgba(29,158,117,0.3) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 60% at 20% 80%, rgba(127,119,221,0.25) 0%, transparent 70%);
+}
+.hero-tag {
+  display: inline-block;
+  background: rgba(29,158,117,0.25);
+  color: #5DCAA5;
+  font-size: 11px;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 99px;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  position: relative;
+  margin-bottom: 0.4rem;
+}
+.hero h1 span { color: #5DCAA5; }
+.hero-sub { font-size: 14px; color: rgba(255,255,255,0.5); position: relative; margin-bottom: 1.5rem; }
+.day-nav { display: flex; align-items: center; justify-content: center; gap: 1.5rem; position: relative; margin-bottom: 1.25rem; }
+.day-nav-btn {
+  background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 99px; width: 36px; height: 36px;
+  cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+}
+.day-nav-btn:hover { background: rgba(255,255,255,0.18); }
+.day-num { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: #fff; line-height: 1; }
+.day-focus { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+.day-pills { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; max-width: 420px; margin: 0 auto; position: relative; }
+.pill { width: 10px; height: 10px; border-radius: 99px; background: rgba(255,255,255,0.15); cursor: pointer; transition: background 0.2s, transform 0.15s; }
+.pill.done { background: var(--green); }
+.pill.active { background: #fff; transform: scale(1.3); }
+
+.main { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+.stat { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+.stat-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); line-height: 1; }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.progress-wrap { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 12px; }
+.progress-label { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+.bar-bg { flex: 1; height: 8px; background: #eee; border-radius: 99px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--green), #5DCAA5); transition: width 0.4s ease; }
+.progress-pct { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--green); min-width: 38px; text-align: right; }
+.section { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; }
+.section-header { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 0.5px solid var(--border); }
+.s-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.s-icon.ex { background: var(--green-light); }
+.s-icon.diet { background: var(--amber-light); }
+.s-icon.life { background: var(--purple-light); }
+.section-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+.section-sub { font-size: 12px; color: var(--text-muted); }
+.s-count { margin-left: auto; font-size: 12px; color: var(--text-muted); background: var(--bg); border-radius: 99px; padding: 3px 10px; font-weight: 500; }
+.task { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.12s; user-select: none; }
+.task:last-child { border-bottom: none; }
+.task:hover { background: #fafaf8; }
+.task.done .task-name { color: #aaa; text-decoration: line-through; }
+.task.done .task-detail { color: #ccc; }
+.cb { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid #ccc; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: #fff; }
+.cb.on { border-color: var(--green); background: var(--green); }
+.cb svg { display: none; }
+.cb.on svg { display: block; }
+.task-name { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.35; }
+.task-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.rest-banner { background: linear-gradient(135deg, #EEEDFE, #E1F5EE); border-radius: var(--radius-sm); padding: 18px; text-align: center; margin: 12px 16px 16px; }
+.rest-banner .rb-icon { font-size: 32px; margin-bottom: 6px; }
+.rest-banner h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--purple-dark); margin-bottom: 4px; }
+.rest-banner p { font-size: 13px; color: var(--text-muted); }
+
+/* TRACKER */
+.tracker-hero {
+  background: var(--text);
+  color: #fff;
+  padding: 1.5rem 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.tracker-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 30% 30%, rgba(55,138,221,0.25) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 60% at 80% 70%, rgba(127,119,221,0.2) 0%, transparent 70%);
+}
+.tracker-hero h2 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; position: relative; margin-bottom: 4px; }
+.tracker-hero p { font-size: 13px; color: rgba(255,255,255,0.5); position: relative; }
+.tracker-main { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+.log-card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 1.25rem; }
+.log-card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
+.metric-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.metric-box { display: flex; flex-direction: column; gap: 5px; }
+.metric-box label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+.metric-icon { font-size: 18px; margin-bottom: 2px; }
+.metric-input-wrap input {
+  width: 100%;
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+.metric-input-wrap input::-webkit-outer-spin-button,
+.metric-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.metric-input-wrap input:focus { border-color: var(--green); }
+.metric-unit { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.save-btn {
+  width: 100%;
+  margin-top: 14px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 13px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.save-btn:hover { background: #179060; }
+.save-btn:active { transform: scale(0.98); }
+.save-confirm { text-align: center; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 8px; height: 20px; }
+
+.latest-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+.latest-card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 12px; text-align: center; }
+.latest-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
+.latest-val.wt { color: var(--green); }
+.latest-val.wa { color: var(--blue); }
+.latest-val.vo { color: var(--purple); }
+.latest-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.latest-delta { font-size: 11px; margin-top: 5px; font-weight: 500; }
+.d-up { color: #E24B4A; }
+.d-dn { color: var(--green); }
+.d-eq { color: var(--text-muted); }
+
+.chart-card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 18px 18px 14px; margin-bottom: 1rem; }
+.chart-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.chart-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.chart-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+.chart-range { margin-left: auto; display: flex; gap: 4px; }
+.range-btn { font-size: 11px; color: var(--text-muted); background: var(--bg); border: 0.5px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; font-weight: 500; transition: background 0.1s; }
+.range-btn.on { background: var(--text); color: #fff; border-color: var(--text); }
+.chart-wrap { position: relative; height: 180px; }
+
+.history-card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; }
+.history-card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; padding: 14px 16px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+.history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.history-table th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); padding: 8px 16px; text-align: left; border-bottom: 0.5px solid var(--border); background: var(--bg); font-weight: 500; }
+.history-table td { padding: 10px 16px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+.history-table tr:last-child td { border-bottom: none; }
+.no-data { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 14px; }
+
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111110; --card: #1c1c1a; --text: #f0ede6; --text-muted: #888880; --border: rgba(255,255,255,0.08); }
+  .task:hover { background: #222220; }
+  .cb { background: #111; border-color: #444; }
+  .bar-bg { background: #2a2a28; }
+  .metric-input-wrap input { background: #111110; color: #f0ede6; border-color: rgba(255,255,255,0.12); }
+  .range-btn { background: #2a2a28; }
+  .history-table th { background: #111110; }
+}
+@media (max-width: 480px) {
+  .metric-inputs { grid-template-columns: 1fr; }
+  .tab-btn { padding: 14px 12px 12px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('checklist',this)">Checklist</button>
+  <button class="tab-btn" onclick="switchTab('tracker',this)">Progress</button>
+</div>
+
+<!-- CHECKLIST PAGE -->
+<div id="page-checklist" class="page active">
+  <div class="hero">
+    <div class="hero-tag">30-Day Program</div>
+    <h1>Build Muscle.<br/><span>Get Fit.</span></h1>
+    <p class="hero-sub">Your daily checklist — exercise, diet &amp; lifestyle</p>
+    <div class="day-nav">
+      <button class="day-nav-btn" onclick="changeDay(-1)">&#8592;</button>
+      <div style="text-align:center">
+        <div class="day-num" id="day-num">Day 1</div>
+        <div class="day-focus" id="day-focus">—</div>
+      </div>
+      <button class="day-nav-btn" onclick="changeDay(1)">&#8594;</button>
+    </div>
+    <div class="day-pills" id="day-pills"></div>
+  </div>
+  <div class="main">
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="s-done">0</div><div class="stat-label">Done</div></div>
+      <div class="stat"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat"><div class="stat-num" id="s-streak">0</div><div class="stat-label">Streak</div></div>
+    </div>
+    <div class="progress-wrap">
+      <span class="progress-label">Today's progress</span>
+      <div class="bar-bg"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+      <span class="progress-pct" id="pct">0%</span>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <div class="s-icon ex">💪</div>
+        <div><div class="section-title">Exercise</div><div class="section-sub" id="ex-sub"></div></div>
+        <div class="s-count" id="ex-count">0/0</div>
+      </div>
+      <div id="ex-list"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <div class="s-icon diet">🥗</div>
+        <div><div class="section-title">Diet</div><div class="section-sub">Fuel your gains</div></div>
+        <div class="s-count" id="diet-count">0/0</div>
+      </div>
+      <div id="diet-list"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <div class="s-icon life">✨</div>
+        <div><div class="section-title">Lifestyle</div><div class="section-sub">Recovery &amp; wellbeing</div></div>
+        <div class="s-count" id="life-count">0/0</div>
+      </div>
+      <div id="life-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKER PAGE -->
+<div id="page-tracker" class="page">
+  <div class="tracker-hero">
+    <h2 style="position:relative">Progress Tracker</h2>
+    <p style="position:relative">Log your metrics. Watch yourself transform.</p>
+  </div>
+  <div class="tracker-main">
+
+    <div class="log-card">
+      <h3>Log Today — <span id="log-date-label"></span></h3>
+      <div class="metric-inputs">
+        <div class="metric-box">
+          <div class="metric-icon">⚖️</div>
+          <label>Weight</label>
+          <div class="metric-input-wrap"><input type="number" id="inp-weight" placeholder="—" step="0.1" min="20" max="300"/></div>
+          <div class="metric-unit">kg</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-icon">💧</div>
+          <label>Water</label>
+          <div class="metric-input-wrap"><input type="number" id="inp-water" placeholder="—" step="0.1" min="0" max="10"/></div>
+          <div class="metric-unit">litres</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-icon">🫁</div>
+          <label>VO₂ Max</label>
+          <div class="metric-input-wrap"><input type="number" id="inp-vo2" placeholder="—" step="0.1" min="10" max="100"/></div>
+          <div class="metric-unit">ml/kg/min</div>
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveMetrics()">Save Today's Log</button>
+      <div class="save-confirm" id="save-confirm"></div>
+    </div>
+
+    <div class="latest-row">
+      <div class="latest-card">
+        <div class="latest-val wt" id="lv-weight">—</div>
+        <div class="latest-label">Weight (kg)</div>
+        <div id="ld-weight"></div>
+      </div>
+      <div class="latest-card">
+        <div class="latest-val wa" id="lv-water">—</div>
+        <div class="latest-label">Water (L)</div>
+        <div id="ld-water"></div>
+      </div>
+      <div class="latest-card">
+        <div class="latest-val vo" id="lv-vo2">—</div>
+        <div class="latest-label">VO₂ Max</div>
+        <div id="ld-vo2"></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-dot" style="background:var(--green)"></div>
+        <span class="chart-title">Weight over time</span>
+        <div class="chart-range" id="range-weight">
+          <button class="range-btn on" onclick="setRange('weight',7,this)">7d</button>
+          <button class="range-btn" onclick="setRange('weight',14,this)">14d</button>
+          <button class="range-btn" onclick="setRange('weight',30,this)">30d</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-weight"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-dot" style="background:var(--blue)"></div>
+        <span class="chart-title">Daily water intake</span>
+        <div class="chart-range" id="range-water">
+          <button class="range-btn on" onclick="setRange('water',7,this)">7d</button>
+          <button class="range-btn" onclick="setRange('water',14,this)">14d</button>
+          <button class="range-btn" onclick="setRange('water',30,this)">30d</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-water"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-dot" style="background:var(--purple)"></div>
+        <span class="chart-title">VO₂ Max trend</span>
+        <div class="chart-range" id="range-vo2">
+          <button class="range-btn on" onclick="setRange('vo2',7,this)">7d</button>
+          <button class="range-btn" onclick="setRange('vo2',14,this)">14d</button>
+          <button class="range-btn" onclick="setRange('vo2',30,this)">30d</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-vo2"></canvas></div>
+    </div>
+
+    <div class="history-card">
+      <h3>Log history</h3>
+      <div id="history-table-wrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── WORKOUT DATA ──
+const workouts = [
+  {focus:"Upper body strength",rest:false,ex:[{n:"Push-ups",d:"4 sets × 15 reps"},{n:"Dumbbell shoulder press",d:"3 sets × 12 reps"},{n:"Tricep dips",d:"3 sets × 12 reps"},{n:"Bicep curls",d:"3 sets × 10 reps"},{n:"Plank hold",d:"3 × 45 seconds"}]},
+  {focus:"Lower body power",rest:false,ex:[{n:"Squats",d:"4 sets × 15 reps"},{n:"Lunges",d:"3 sets × 12 each leg"},{n:"Glute bridges",d:"3 sets × 15 reps"},{n:"Calf raises",d:"4 sets × 20 reps"},{n:"Wall sit",d:"3 × 45 seconds"}]},
+  {focus:"Cardio & core",rest:false,ex:[{n:"20-min run or jump rope",d:"Steady moderate pace"},{n:"Mountain climbers",d:"3 sets × 30 reps"},{n:"Bicycle crunches",d:"3 sets × 20 reps"},{n:"Leg raises",d:"3 sets × 15 reps"},{n:"Burpees",d:"3 sets × 10 reps"}]},
+  {focus:"Back & biceps",rest:false,ex:[{n:"Pull-ups or lat pulldown",d:"4 sets × 10 reps"},{n:"Bent-over rows",d:"3 sets × 12 reps"},{n:"Face pulls",d:"3 sets × 15 reps"},{n:"Hammer curls",d:"3 sets × 12 reps"},{n:"Superman holds",d:"3 sets × 15 reps"}]},
+  {focus:"HIIT day",rest:false,ex:[{n:"Jump squats",d:"4 sets × 12 reps"},{n:"High knees",d:"4 rounds × 30 seconds"},{n:"Box jumps",d:"3 sets × 10 reps"},{n:"Sprint intervals",d:"6 × 20 seconds"},{n:"Skater jumps",d:"3 sets × 15 reps"}]},
+  {focus:"Chest & shoulders",rest:false,ex:[{n:"Bench press or floor press",d:"4 sets × 12 reps"},{n:"Incline push-ups",d:"3 sets × 15 reps"},{n:"Lateral raises",d:"3 sets × 15 reps"},{n:"Arnold press",d:"3 sets × 10 reps"},{n:"Cable fly or chest stretch",d:"3 sets × 12 reps"}]},
+  {focus:"Active recovery",rest:true,ex:[{n:"30-min brisk walk",d:"Outdoors if possible"},{n:"Full-body stretching",d:"20 minutes"},{n:"Foam rolling",d:"10 minutes"},{n:"Deep breathing",d:"5 minutes"},{n:"Mobility flow",d:"10 minutes"}]},
+  {focus:"Upper body strength +",rest:false,ex:[{n:"Diamond push-ups",d:"4 sets × 12 reps"},{n:"Overhead press",d:"4 sets × 10 reps"},{n:"Close-grip bench",d:"3 sets × 12 reps"},{n:"Concentration curls",d:"3 sets × 12 reps"},{n:"Side plank",d:"3 × 40 sec each side"}]},
+  {focus:"Leg day intensity",rest:false,ex:[{n:"Bulgarian split squats",d:"3 sets × 10 each leg"},{n:"Romanian deadlift",d:"4 sets × 10 reps"},{n:"Step-ups",d:"3 sets × 15 each leg"},{n:"Leg press",d:"4 sets × 15 reps"},{n:"Hamstring curls",d:"3 sets × 12 reps"}]},
+  {focus:"Core intensive",rest:false,ex:[{n:"Dead bug",d:"3 sets × 10 reps each"},{n:"Russian twists",d:"3 sets × 20 reps"},{n:"Hollow body hold",d:"3 × 30 seconds"},{n:"V-ups",d:"3 sets × 15 reps"},{n:"Ab wheel rollout",d:"3 sets × 10 reps"}]},
+  {focus:"Pull day",rest:false,ex:[{n:"Wide-grip pull-ups",d:"4 sets × 8 reps"},{n:"Seated cable row",d:"3 sets × 12 reps"},{n:"Single-arm dumbbell row",d:"3 sets × 12 each"},{n:"Rear delt fly",d:"3 sets × 15 reps"},{n:"Chin-ups",d:"3 sets × 8 reps"}]},
+  {focus:"Cardio conditioning",rest:false,ex:[{n:"30-min cycling or rowing",d:"Moderate intensity"},{n:"Jump rope intervals",d:"5 × 1 min on / 30 sec off"},{n:"Stair climbs",d:"10 minutes"},{n:"Jumping jacks",d:"3 sets × 50 reps"},{n:"Cool-down walk",d:"5 minutes"}]},
+  {focus:"Push day",rest:false,ex:[{n:"Barbell bench press",d:"4 sets × 8 reps"},{n:"Dumbbell flyes",d:"3 sets × 12 reps"},{n:"Pike push-ups",d:"3 sets × 12 reps"},{n:"Tricep pushdowns",d:"3 sets × 15 reps"},{n:"Chest dips",d:"3 sets × 10 reps"}]},
+  {focus:"Active recovery",rest:true,ex:[{n:"Yoga flow",d:"30 minutes"},{n:"Light swimming or walk",d:"20 minutes"},{n:"Foam rolling — full body",d:"15 minutes"},{n:"Journal your progress",d:"5 minutes"},{n:"Sleep 8 hours tonight",d:"Priority rest"}]},
+  {focus:"Full body compound",rest:false,ex:[{n:"Deadlifts",d:"4 sets × 8 reps"},{n:"Barbell squats",d:"4 sets × 10 reps"},{n:"Bent-over rows",d:"3 sets × 10 reps"},{n:"Push press",d:"3 sets × 10 reps"},{n:"Farmer's carry",d:"3 × 40 metres"}]},
+  {focus:"Upper body endurance",rest:false,ex:[{n:"Push-up ladder (1–10–1)",d:"Up and back"},{n:"Band pull-aparts",d:"3 sets × 20 reps"},{n:"Dips",d:"4 sets × 12 reps"},{n:"Inverted rows",d:"3 sets × 12 reps"},{n:"Plank shoulder taps",d:"3 × 30 reps"}]},
+  {focus:"Lower body endurance",rest:false,ex:[{n:"Jump lunges",d:"3 sets × 20 reps"},{n:"Sumo squats",d:"4 sets × 15 reps"},{n:"Donkey kicks",d:"3 sets × 20 each"},{n:"Fire hydrants",d:"3 sets × 20 each"},{n:"Standing calf raises",d:"5 sets × 25 reps"}]},
+  {focus:"HIIT advanced",rest:false,ex:[{n:"Burpee pull-ups",d:"4 sets × 8 reps"},{n:"Tuck jumps",d:"3 sets × 12 reps"},{n:"Bear crawl",d:"3 × 20 metres"},{n:"Lateral bounds",d:"3 sets × 12 reps"},{n:"Sprint tabata",d:"8 × 20 sec on / 10 sec off"}]},
+  {focus:"Shoulder specialisation",rest:false,ex:[{n:"Seated dumbbell press",d:"4 sets × 12 reps"},{n:"Front raises",d:"3 sets × 12 reps"},{n:"Upright rows",d:"3 sets × 12 reps"},{n:"Shrugs",d:"4 sets × 15 reps"},{n:"Reverse pec deck",d:"3 sets × 15 reps"}]},
+  {focus:"Core & flexibility",rest:false,ex:[{n:"Yoga sun salutations",d:"5 rounds"},{n:"Plank variations",d:"3 × 45 sec each"},{n:"Windmill stretches",d:"3 sets × 10 reps"},{n:"Pigeon pose",d:"2 min each side"},{n:"Hip flexor stretch",d:"2 min each side"}]},
+  {focus:"Active recovery",rest:true,ex:[{n:"Long walk outdoors",d:"45 minutes"},{n:"Full body stretch",d:"20 minutes"},{n:"Cold shower",d:"2–3 minutes"},{n:"Meal prep for the week",d:"Build good habits"},{n:"Progress photos",d:"Track your journey"}]},
+  {focus:"Full body strength",rest:false,ex:[{n:"Trap bar deadlift",d:"4 sets × 8 reps"},{n:"Incline dumbbell press",d:"3 sets × 10 reps"},{n:"Cable rows",d:"3 sets × 12 reps"},{n:"Goblet squats",d:"3 sets × 15 reps"},{n:"Pallof press",d:"3 sets × 12 reps"}]},
+  {focus:"Power & explosives",rest:false,ex:[{n:"Power cleans",d:"4 sets × 5 reps"},{n:"Box jumps",d:"4 sets × 8 reps"},{n:"Broad jumps",d:"3 sets × 6 reps"},{n:"Plyo push-ups",d:"3 sets × 8 reps"},{n:"Medicine ball slams",d:"3 sets × 10 reps"}]},
+  {focus:"Arm day",rest:false,ex:[{n:"EZ bar curls",d:"4 sets × 12 reps"},{n:"Skull crushers",d:"4 sets × 12 reps"},{n:"Preacher curls",d:"3 sets × 10 reps"},{n:"Overhead tricep extension",d:"3 sets × 12 reps"},{n:"Cable curls + pushdowns",d:"3 sets × 15 reps each"}]},
+  {focus:"Cardio & intervals",rest:false,ex:[{n:"5 km run or brisk walk",d:"Time yourself"},{n:"Hill sprints",d:"8 × 20 sec"},{n:"Agility ladder drills",d:"5 minutes"},{n:"Jump rope double-unders",d:"3 sets × 30 reps"},{n:"Cool-down stretching",d:"10 minutes"}]},
+  {focus:"Back thickness",rest:false,ex:[{n:"T-bar rows",d:"4 sets × 10 reps"},{n:"Chest-supported rows",d:"3 sets × 12 reps"},{n:"Lat pulldown wide grip",d:"3 sets × 12 reps"},{n:"Seated rows",d:"3 sets × 12 reps"},{n:"Good mornings",d:"3 sets × 12 reps"}]},
+  {focus:"Leg strength peak",rest:false,ex:[{n:"Back squats — heavy",d:"5 sets × 5 reps"},{n:"Hack squats",d:"3 sets × 10 reps"},{n:"Walking lunges",d:"3 sets × 20 reps"},{n:"Seated leg press",d:"4 sets × 12 reps"},{n:"Single-leg calf raises",d:"4 sets × 15 each"}]},
+  {focus:"Active recovery",rest:true,ex:[{n:"Restorative yoga",d:"30 minutes"},{n:"Epsom salt bath",d:"20 minutes"},{n:"Light cycling",d:"20 minutes easy"},{n:"Reflect on 4 weeks",d:"Write 3 wins"},{n:"Plan month 2",d:"Set your next goals"}]},
+  {focus:"Full body finisher",rest:false,ex:[{n:"Deadlifts",d:"3 sets × 8 reps"},{n:"Bench press",d:"3 sets × 10 reps"},{n:"Pull-ups",d:"3 sets × max reps"},{n:"Squats",d:"3 sets × 12 reps"},{n:"Core circuit",d:"Plank + crunch + leg raise × 3"}]},
+  {focus:"Day 30 — Celebrate!",rest:false,ex:[{n:"Your favourite workout",d:"Go all out — you earned it"},{n:"Progress photos",d:"Document your transformation"},{n:"Max push-up test",d:"Beat your Day 1 score"},{n:"Max squat test",d:"Beat your Day 1 score"},{n:"Write your 30-day review",d:"Celebrate every win"}]},
+];
+const dietTasks = [
+  {n:"Breakfast",d:"High-protein: eggs + oats or Greek yogurt + berries"},
+  {n:"Morning snack",d:"Handful of almonds or fruit"},
+  {n:"Lunch",d:"Lean protein + brown rice or sweet potato + greens"},
+  {n:"Pre-workout snack",d:"Banana or rice cakes with peanut butter"},
+  {n:"Post-workout shake",d:"Whey or plant protein + milk"},
+  {n:"Dinner",d:"Grilled protein + roasted veg + complex carbs"},
+  {n:"Evening snack (optional)",d:"Cottage cheese or casein before bed"},
+];
+const lifeTasks = [
+  {n:"Drink 3 litres of water",d:"Track with a reusable bottle"},
+  {n:"Sleep 7–8 hours",d:"Same bedtime every night"},
+  {n:"Morning skincare",d:"Cleanse → tone → moisturise → SPF"},
+  {n:"Evening skincare",d:"Cleanse → serum → moisturise"},
+  {n:"10-min mindfulness",d:"Meditate, breathe, or journal"},
+  {n:"8,000+ steps",d:"Use your phone pedometer"},
+];
+
+// ── CHECKLIST ──
+function getStartDate() {
+  let s = localStorage.getItem('fit_start');
+  if (!s) { s = new Date().toISOString().split('T')[0]; localStorage.setItem('fit_start', s); }
+  return s;
+}
+function todayIndex() {
+  const diff = Math.floor((new Date() - new Date(getStartDate())) / 86400000);
+  return Math.min(Math.max(diff, 0), 29);
+}
+let currentDay = todayIndex();
+let checks = JSON.parse(localStorage.getItem('fit_checks') || '{}');
+function saveChecks() { localStorage.setItem('fit_checks', JSON.stringify(checks)); }
+function ck(d,cat,i) { return `d${d}_${cat}_${i}`; }
+
+function buildTaskList(cid, countId, items, cat) {
+  const ul = document.getElementById(cid);
+  ul.innerHTML = '';
+  let done = 0;
+  items.forEach((item, i) => {
+    const k = ck(currentDay, cat, i);
+    const checked = !!checks[k];
+    if (checked) done++;
+    const row = document.createElement('div');
+    row.className = 'task' + (checked ? ' done' : '');
+    row.innerHTML = `<div class="cb ${checked?'on':''}"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><polyline points="1,4.5 4.5,8 10,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="task-name">${item.n}</div><div class="task-detail">${item.d}</div></div>`;
+    row.onclick = () => { checks[k]=!checks[k]; saveChecks(); renderChecklist(); };
+    ul.appendChild(row);
+  });
+  document.getElementById(countId).textContent = `${done}/${items.length}`;
+  return done;
+}
+function isDayComplete(d) {
+  const w = workouts[d];
+  return [...w.ex.map((_,i)=>ck(d,'ex',i)),...dietTasks.map((_,i)=>ck(d,'diet',i)),...lifeTasks.map((_,i)=>ck(d,'life',i))].every(k=>checks[k]);
+}
+function renderChecklist() {
+  const w = workouts[currentDay];
+  document.getElementById('day-num').textContent = `Day ${currentDay+1}`;
+  document.getElementById('day-focus').textContent = w.focus;
+  document.getElementById('ex-sub').textContent = w.focus;
+  const pe = document.getElementById('day-pills');
+  pe.innerHTML = '';
+  for (let i=0;i<30;i++) {
+    const p = document.createElement('div');
+    p.className = 'pill'+(isDayComplete(i)?' done':'')+(i===currentDay?' active':'');
+    p.title = `Day ${i+1}`;
+    p.onclick = e => { e.stopPropagation(); currentDay=i; renderChecklist(); };
+    pe.appendChild(p);
+  }
+  const exList = document.getElementById('ex-list');
+  exList.innerHTML = '';
+  if (w.rest) {
+    const b = document.createElement('div');
+    b.className = 'rest-banner';
+    b.innerHTML = '<div class="rb-icon">🧘</div><h3>Rest & Recover</h3><p>Light movement only. Your muscles grow during rest.</p>';
+    exList.appendChild(b);
+  }
+  let exDone = buildTaskList('ex-list','ex-count',w.ex,'ex');
+  const dd = buildTaskList('diet-list','diet-count',dietTasks,'diet');
+  const ld = buildTaskList('life-list','life-count',lifeTasks,'life');
+  const total = w.ex.length + dietTasks.length + lifeTasks.length;
+  const done = exDone + dd + ld;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('s-done').textContent = done;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('bar').style.width = pct+'%';
+  document.getElementById('pct').textContent = pct+'%';
+  let streak=0;
+  for (let i=currentDay;i>=0;i--) { if(isDayComplete(i)) streak++; else break; }
+  document.getElementById('s-streak').textContent = streak;
+}
+function changeDay(dir) { currentDay=Math.max(0,Math.min(29,currentDay+dir)); renderChecklist(); }
+
+// ── TRACKER ──
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function getMetrics() { return JSON.parse(localStorage.getItem('fit_metrics')||'{}'); }
+function putMetrics(m) { localStorage.setItem('fit_metrics', JSON.stringify(m)); }
+
+let chartInstances = {};
+let ranges = {weight:7, water:7, vo2:7};
+
+function saveMetrics() {
+  const w  = parseFloat(document.getElementById('inp-weight').value);
+  const wa = parseFloat(document.getElementById('inp-water').value);
+  const v  = parseFloat(document.getElementById('inp-vo2').value);
+  if (isNaN(w) && isNaN(wa) && isNaN(v)) return;
+  const m = getMetrics();
+  const t = todayStr();
+  m[t] = m[t] || {};
+  if (!isNaN(w))  m[t].weight = w;
+  if (!isNaN(wa)) m[t].water  = wa;
+  if (!isNaN(v))  m[t].vo2    = v;
+  putMetrics(m);
+  const conf = document.getElementById('save-confirm');
+  conf.textContent = '✓ Saved successfully!';
+  setTimeout(() => conf.textContent='', 2500);
+  renderTracker();
+}
+
+function fmtDate(str) {
+  return new Date(str+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+function delta(arr, field) {
+  if (arr.length < 2) return '';
+  const a = arr[arr.length-1][field], b = arr[arr.length-2][field];
+  if (a==null||b==null) return '';
+  const d = parseFloat((a-b).toFixed(1));
+  if (d>0) return `<div class="latest-delta d-up">&#9650; +${d}</div>`;
+  if (d<0) return `<div class="latest-delta d-dn">&#9660; ${d}</div>`;
+  return `<div class="latest-delta d-eq">no change</div>`;
+}
+
+function chartData(field, days) {
+  const m = getMetrics();
+  const keys = Object.keys(m).sort().slice(-days);
+  return { labels: keys.map(fmtDate), data: keys.map(k => m[k][field]!=null ? m[k][field] : null) };
+}
+
+const COLORS = {weight:'#1D9E75', water:'#378ADD', vo2:'#7F77DD'};
+const FILLS  = {weight:'rgba(29,158,117,0.1)', water:'rgba(55,138,221,0.1)', vo2:'rgba(127,119,221,0.1)'};
+
+function buildChart(field, type) {
+  const {labels, data} = chartData(field, ranges[field]);
+  const ctx = document.getElementById('chart-'+field).getContext('2d');
+  if (chartInstances[field]) chartInstances[field].destroy();
+  chartInstances[field] = new Chart(ctx, {
+    type: type,
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: COLORS[field],
+        backgroundColor: type==='bar' ? COLORS[field]+'bb' : FILLS[field],
+        borderWidth: 2,
+        tension: 0.4,
+        pointRadius: type!=='bar' ? 5 : 0,
+        pointBackgroundColor: COLORS[field],
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        fill: type!=='bar',
+        spanGaps: true,
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#1a1a18',titleColor:'#fff',bodyColor:'rgba(255,255,255,0.7)',
+        padding:10,cornerRadius:8,displayColors:false
+      }},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11},color:'#888'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#888'},beginAtZero:field==='water'}
+      }
+    }
+  });
+}
+
+function setRange(field, days, btn) {
+  ranges[field] = days;
+  document.getElementById('range-'+field).querySelectorAll('.range-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  buildChart(field, field==='water'?'bar':'line');
+}
+
+function renderTracker() {
+  const today = todayStr();
+  document.getElementById('log-date-label').textContent = fmtDate(today);
+  const m = getMetrics();
+  const keys = Object.keys(m).sort();
+  const entries = keys.map(k=>({date:k,...m[k]}));
+  const wt = entries.filter(e=>e.weight!=null);
+  const wa = entries.filter(e=>e.water!=null);
+  const vo = entries.filter(e=>e.vo2!=null);
+  document.getElementById('lv-weight').textContent = wt.length ? wt[wt.length-1].weight : '—';
+  document.getElementById('lv-water').textContent  = wa.length ? wa[wa.length-1].water  : '—';
+  document.getElementById('lv-vo2').textContent    = vo.length ? vo[vo.length-1].vo2    : '—';
+  document.getElementById('ld-weight').innerHTML = delta(wt,'weight');
+  document.getElementById('ld-water').innerHTML  = delta(wa,'water');
+  document.getElementById('ld-vo2').innerHTML    = delta(vo,'vo2');
+  if (m[today]) {
+    if (m[today].weight!=null) document.getElementById('inp-weight').value = m[today].weight;
+    if (m[today].water!=null)  document.getElementById('inp-water').value  = m[today].water;
+    if (m[today].vo2!=null)    document.getElementById('inp-vo2').value    = m[today].vo2;
+  }
+  buildChart('weight','line');
+  buildChart('water','bar');
+  buildChart('vo2','line');
+  const wrap = document.getElementById('history-table-wrap');
+  if (!entries.length) { wrap.innerHTML='<div class="no-data">No entries yet — log your first metrics above!</div>'; return; }
+  const rows = [...entries].reverse().slice(0,30).map(e=>`<tr>
+    <td>${fmtDate(e.date)}</td>
+    <td>${e.weight!=null?e.weight:'—'}</td>
+    <td>${e.water!=null?e.water:'—'}</td>
+    <td>${e.vo2!=null?e.vo2:'—'}</td>
+  </tr>`).join('');
+  wrap.innerHTML=`<table class="history-table"><thead><tr><th>Date</th><th>Weight (kg)</th><th>Water (L)</th><th>VO₂ Max</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ── TABS ──
+function switchTab(tab, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab==='tracker') renderTracker();
+}
+
+renderChecklist();
+</script>
+</body>
+</html>
